@@ -1,0 +1,92 @@
+CREATE TABLE IF NOT EXISTS public.alumno_se_matricula_asignatura
+(
+    id_alumno integer NOT NULL DEFAULT nextval('alumno_se_matricula_asignatura_id_alumno_seq'::regclass),
+    id_asignatura integer NOT NULL DEFAULT nextval('alumno_se_matricula_asignatura_id_asignatura_seq'::regclass),
+    id_curso_escolar integer NOT NULL DEFAULT nextval('alumno_se_matricula_asignatura_id_curso_escolar_seq'::regclass),
+    CONSTRAINT alumno_se_matricula_asignatura_pkey PRIMARY KEY (id_alumno, id_asignatura, id_curso_escolar),
+    CONSTRAINT alumno_se_matricula_asignatura_id_alumno_fkey FOREIGN KEY (id_alumno)
+        REFERENCES public.persona (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT alumno_se_matricula_asignatura_id_asignatura_fkey FOREIGN KEY (id_asignatura)
+        REFERENCES public.asignatura (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT alumno_se_matricula_asignatura_id_curso_escolar_fkey FOREIGN KEY (id_curso_escolar)
+        REFERENCES public.curso_escolar (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+CREATE TABLE IF NOT EXISTS public.asignatura
+(
+    id integer NOT NULL DEFAULT nextval('asignatura_id_seq'::regclass),
+    nombre character varying(100) COLLATE pg_catalog."default" NOT NULL,
+    creditos double precision NOT NULL,
+    tipo character varying(20) COLLATE pg_catalog."default" NOT NULL,
+    curso smallint NOT NULL,
+    cuatrimestre smallint NOT NULL,
+    id_profesor integer,
+    id_grado integer NOT NULL,
+    CONSTRAINT asignatura_pkey PRIMARY KEY (id),
+    CONSTRAINT asignatura_id_grado_fkey FOREIGN KEY (id_grado)
+        REFERENCES public.grado (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT asignatura_id_profesor_fkey FOREIGN KEY (id_profesor)
+        REFERENCES public.profesor (id_profesor) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT asignatura_tipo_check CHECK (tipo::text = ANY (ARRAY['básica'::character varying::text, 'obligatoria'::character varying::text, 'optativa'::character varying::text]))
+)
+CREATE TABLE IF NOT EXISTS public.curso_escolar
+(
+    id integer NOT NULL DEFAULT nextval('curso_escolar_id_seq'::regclass),
+    anyo_inicio integer NOT NULL,
+    anyo_fin integer NOT NULL,
+    CONSTRAINT curso_escolar_pkey PRIMARY KEY (id)
+)
+CREATE TABLE IF NOT EXISTS public.departamento
+(
+    id integer NOT NULL DEFAULT nextval('departamento_id_seq'::regclass),
+    nombre character varying(50) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT departamento_pkey PRIMARY KEY (id)
+)
+CREATE TABLE IF NOT EXISTS public.grado
+(
+    id integer NOT NULL DEFAULT nextval('grado_id_seq'::regclass),
+    nombre character varying(100) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT grado_pkey PRIMARY KEY (id)
+)
+CREATE TABLE IF NOT EXISTS public.persona
+(
+    id integer NOT NULL DEFAULT nextval('persona_id_seq'::regclass),
+    nif character varying(9) COLLATE pg_catalog."default",
+    nombre character varying(25) COLLATE pg_catalog."default" NOT NULL,
+    apellido1 character varying(50) COLLATE pg_catalog."default" NOT NULL,
+    apellido2 character varying(50) COLLATE pg_catalog."default",
+    ciudad character varying(25) COLLATE pg_catalog."default" NOT NULL,
+    direccion character varying(50) COLLATE pg_catalog."default" NOT NULL,
+    telefono character varying(9) COLLATE pg_catalog."default",
+    fecha_nacimiento date NOT NULL,
+    sexo character(1) COLLATE pg_catalog."default" NOT NULL,
+    tipo character varying(15) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT persona_pkey PRIMARY KEY (id),
+    CONSTRAINT persona_nif_key UNIQUE (nif),
+    CONSTRAINT persona_sexo_check CHECK (sexo = ANY (ARRAY['H'::bpchar, 'M'::bpchar])),
+    CONSTRAINT persona_tipo_check CHECK (tipo::text = ANY (ARRAY['profesor'::character varying::text, 'alumno'::character varying::text]))
+)
+CREATE TABLE IF NOT EXISTS public.profesor
+(
+    id_profesor integer NOT NULL DEFAULT nextval('profesor_id_profesor_seq'::regclass),
+    id_departamento integer NOT NULL DEFAULT nextval('profesor_id_departamento_seq'::regclass),
+    CONSTRAINT profesor_pkey PRIMARY KEY (id_profesor),
+    CONSTRAINT profesor_id_departamento_fkey FOREIGN KEY (id_departamento)
+        REFERENCES public.departamento (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT profesor_id_profesor_fkey FOREIGN KEY (id_profesor)
+        REFERENCES public.persona (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+
